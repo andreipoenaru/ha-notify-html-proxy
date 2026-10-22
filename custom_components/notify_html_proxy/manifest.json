@@ -1,0 +1,12 @@
+{
+  "domain": "notify_html_proxy",
+  "name": "Notify HTML Proxy",
+  "codeowners": ["@yandreipoenaru"],
+  "dependencies": ["notify"],
+  "documentation": "https://github.com/andreipoenaru/ha-notify-html-proxy",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/andreipoenaru/ha-notify-html-proxy/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
