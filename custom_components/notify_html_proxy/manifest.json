@@ -1,7 +1,7 @@
 {
   "domain": "notify_html_proxy",
   "name": "Notify HTML Proxy",
-  "codeowners": ["@yandreipoenaru"],
+  "codeowners": ["@andreipoenaru"],
   "dependencies": ["notify"],
   "documentation": "https://github.com/andreipoenaru/ha-notify-html-proxy",
   "integration_type": "service",
