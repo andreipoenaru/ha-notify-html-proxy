@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html
 import logging
+import re
 from typing import Any
 
 import voluptuous as vol
@@ -27,6 +28,10 @@ _LOGGER = logging.getLogger(__name__)
 DOMAIN = "notify_html_proxy"
 CONF_TARGET_SERVICE = "target_service"
 
+TAB_SIZE = 4
+# Leading spaces of a line, or any run of two or more spaces.
+_SPACES = re.compile(r"^ +| {2,}")
+
 
 def _target_service_name(value: Any) -> str:
     """Accept both ``my_service`` and ``notify.my_service``."""
@@ -42,13 +47,32 @@ PLATFORM_SCHEMA = NOTIFY_PLATFORM_SCHEMA.extend(
 )
 
 
-def plain_to_html(message: str) -> str:
-    """Escape ``message`` and turn newlines into ``<br>`` tags.
+def _preserve_spaces(match: re.Match[str]) -> str:
+    """Replace spaces that HTML would collapse with non-breaking spaces.
 
-    Escaping happens first so that the inserted ``<br>`` tags survive.
+    Leading spaces are all replaced. Inside a line, the last space of a run is
+    kept as a regular space so that long lines can still wrap.
     """
-    normalized = message.replace("\r\n", "\n").replace("\r", "\n")
-    return html.escape(normalized, quote=False).replace("\n", "<br>\n")
+    run = match.group()
+    if match.start() == 0:
+        return "&nbsp;" * len(run)
+    return "&nbsp;" * (len(run) - 1) + " "
+
+
+def plain_to_html(message: str) -> str:
+    """Convert a plain-text message to HTML, preserving its whitespace.
+
+    Tabs are expanded, the text is escaped, runs of spaces and indentation are
+    preserved with ``&nbsp;``, and newlines become ``<br>``. Escaping happens
+    first so that the inserted markup survives.
+    """
+    normalized = (
+        message.replace("\r\n", "\n").replace("\r", "\n").expandtabs(TAB_SIZE)
+    )
+    escaped = html.escape(normalized, quote=False)
+    return "<br>\n".join(
+        _SPACES.sub(_preserve_spaces, line) for line in escaped.split("\n")
+    )
 
 
 async def async_get_service(

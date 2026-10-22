@@ -14,7 +14,8 @@ in plain-text services.
 This integration registers a new notify service that:
 
 1. takes a plain-text `message`,
-2. HTML-escapes it (`&`, `<`, `>`) and converts newlines to `<br>`,
+2. HTML-escapes it (`&`, `<`, `>`), preserves indentation and runs of spaces,
+   and converts newlines to `<br>`,
 3. forwards the call, with `title`, `target` and `data` unchanged, to the
    notify service you configured.
 
@@ -79,8 +80,10 @@ One proxy entry is needed per target service.
   `data` are forwarded untouched. Fields are only forwarded when set, so the
   target's own defaults still apply.
 - URLs are **not** turned into links.
-- Because the output is HTML, runs of spaces and leading indentation are
-  collapsed by the mail client; only newlines are preserved.
+- Indentation and runs of spaces are preserved by converting them to `&nbsp;`
+  (the last space of a run inside a line stays a regular space so lines can
+  still wrap). Tabs are expanded to 4 spaces. Mail clients use proportional
+  fonts, so text aligned into columns will not line up.
 - The target service is looked up when a message is sent, not at startup, so
   load order between integrations doesn't matter. If it doesn't exist, an
   error is raised and logged.
